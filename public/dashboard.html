@@ -113,17 +113,17 @@
     }
 
     async function loadSession() {
-      const res = await fetch('/api/me');
+      const res = await fetch('/api/me', { credentials: 'same-origin' });
+      const data = await res.json().catch(() => ({}));
       if (res.status === 401) {
         window.location.href = '/';
         return;
       }
-      const data = await res.json();
       if (data.user?.username) userLabel.textContent = 'Logado como ' + data.user.username;
       if (data.billing) renderBilling(data.billing);
       else if (data.error) {
         billingCard.className = 'card stop';
-        billingCard.innerHTML = '<strong>Erro billing</strong><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        billingCard.innerHTML = '<strong>Erro ao consultar NestLab</strong><p style="margin:0.5rem 0 0">' + data.error + '</p><pre>' + JSON.stringify(data, null, 2) + '</pre>';
       }
     }
 

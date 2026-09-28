@@ -57,8 +57,12 @@ function getSession(req) {
   return { sessionId, ...session };
 }
 
+function useSecureCookie() {
+  return process.env.COOKIE_SECURE === 'true';
+}
+
 function setSessionCookie(res, token) {
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  const secure = useSecureCookie() ? '; Secure' : '';
   res.setHeader(
     'Set-Cookie',
     `sid=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400${secure}`
@@ -188,10 +192,11 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/me', requireAuth, async (req, res) => {
   const billingResult = await fetchNestlabBilling();
   if (billingResult.error) {
-    return res.status(billingResult.status).json({
+    return res.status(502).json({
       error: billingResult.error,
       user: { username: req.session.username },
       details: billingResult.details,
+      billingUnavailable: true,
     });
   }
 
