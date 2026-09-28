@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login — Cliente demo NestLab</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #e4e4e7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .wrap { width: 100%; max-width: 380px; }
+    h1 { font-size: 1.25rem; margin: 0 0 0.25rem; }
+    .sub { font-size: 0.75rem; color: #71717a; margin-bottom: 1.5rem; }
+    label { display: block; font-size: 0.65rem; font-weight: 700; color: #a1a1aa; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 1rem;
+      border: 1px solid #27272a;
+      background: #111;
+      color: #fff;
+      font-size: 0.85rem;
+    }
+    input:focus { outline: none; border-color: #00ff5f; }
+    button {
+      width: 100%;
+      padding: 0.85rem;
+      border: none;
+      border-radius: 1rem;
+      background: #00ff5f;
+      color: #000;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; }
+    .err {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      background: #1a0a0a;
+      border: 1px solid #ef444455;
+      color: #fca5a5;
+      font-size: 0.75rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Entrar</h1>
+    <p class="sub">Credenciais definidas no Coolify (APP_LOGIN_USER / APP_LOGIN_PASSWORD).</p>
+    <form id="loginForm">
+      <label for="username">Usuário</label>
+      <input id="username" name="username" type="text" autocomplete="username" required />
+      <label for="password">Senha</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required />
+      <button type="submit" id="submitBtn">Acessar painel</button>
+    </form>
+    <div id="error" class="err"></div>
+  </div>
+  <script>
+    const form = document.getElementById('loginForm');
+    const errorEl = document.getElementById('error');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.style.display = 'none';
+      submitBtn.disabled = true;
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errorEl.textContent = data.error || 'Falha no login';
+          errorEl.style.display = 'block';
+          return;
+        }
+        window.location.href = '/dashboard.html';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
