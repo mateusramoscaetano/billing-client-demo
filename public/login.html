@@ -89,7 +89,11 @@
         });
         const data = await res.json();
         if (!res.ok) {
-          errorEl.textContent = data.error || 'Falha no login';
+          let msg = data.error || 'Falha no login';
+          if (data.nestlabStatus === 401 || data.details?.error === 'Não autorizado') {
+            msg = data.error || 'Billing API key inválida na NestLab.';
+          }
+          errorEl.textContent = msg;
           errorEl.style.display = 'block';
           return;
         }

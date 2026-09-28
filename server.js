@@ -112,7 +112,12 @@ async function fetchNestlabBilling() {
     });
     const data = await upstream.json().catch(() => ({}));
     if (!upstream.ok) {
-      return { error: data.error || 'Falha ao consultar NestLab', status: upstream.status, details: data };
+      let message = data.error || 'Falha ao consultar NestLab';
+      if (upstream.status === 401) {
+        message =
+          'NestLab rejeitou a NESTLAB_BILLING_API_KEY. Em /master/clientes, gere uma nova chave para o cliente CLIENT correto e cole no Coolify (sem espaços). A chave precisa ser do mesmo ambiente (nestlab.com.br).';
+      }
+      return { error: message, status: upstream.status, details: data, nestlabStatus: upstream.status };
     }
     return { billing: data, status: 200 };
   } catch {
@@ -166,6 +171,7 @@ app.post('/api/login', async (req, res) => {
     return res.status(billingResult.status).json({
       error: billingResult.error,
       details: billingResult.details,
+      nestlabStatus: billingResult.nestlabStatus,
     });
   }
 
